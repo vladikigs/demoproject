@@ -1,32 +1,33 @@
 package com.calculatorserver.demoproject.service.calculator.service;
 
+import com.calculatorserver.demoproject.service.ParserFactory;
 import com.calculatorserver.demoproject.service.calculator.entity.Operator;
+import org.springframework.stereotype.Component;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
-import static java.math.BigDecimal.ROUND_DOWN;
-
+@Component
 public class Calculator {
 
-    private OperatorRegistry operatorRegistry;
-    private ReversePolishNotation reversePolishNotation;
 
-    public Calculator(OperatorRegistry operatorRegistry, ReversePolishNotation reversePolishNotation) {
+    private final OperatorRegistry operatorRegistry;
+
+    private final ParserFactory parserFactory;
+
+
+    public Calculator(OperatorRegistry operatorRegistry, ParserFactory parserFactory) {
         this.operatorRegistry = operatorRegistry;
-        this.reversePolishNotation = reversePolishNotation;
+        this.parserFactory = parserFactory;
     }
 
     public String calculate(String example, Integer precision) {
-        List<String> reversPolishNotation = new ArrayList<>(reversePolishNotation.parse(example));
-
-        calculatePolishNotation(reversPolishNotation);
-
-        return new BigDecimal(reversPolishNotation.get(0)).setScale(precision, ROUND_DOWN).toString();
+        ReversePolishNotationParser reversePolishNotationParser = parserFactory.getReversePolishNotationParser();
+        List<String> reversPolishNotation = new ArrayList<>(reversePolishNotationParser.parse(example));
+        return calculatePolishNotation(reversPolishNotation, precision);
     }
 
-    private String calculatePolishNotation(List<String> reversPolishNotation) {
+    private String calculatePolishNotation(List<String> reversPolishNotation, Integer precision) {
         for (int i = 0; i < reversPolishNotation.size(); i++) {
             Operator operator = operatorRegistry.searchOperator(reversPolishNotation.get(i));
 
@@ -37,7 +38,7 @@ public class Calculator {
                     newCalc.add(reversPolishNotation.get(i));
                     reversPolishNotation.remove(i);
                 }
-                reversPolishNotation.set(i, calculatePolishNotation(newCalc));
+                reversPolishNotation.set(i, calculatePolishNotation(newCalc, precision));
                 i=0;
             }
 
@@ -46,7 +47,8 @@ public class Calculator {
                     reversPolishNotation.set(i - 2, operatorRegistry.calculationOperatorLogic(
                             reversPolishNotation.get(i - 2),
                             reversPolishNotation.get(i - 1),
-                            operator
+                            operator,
+                            precision
                     ));
                     reversPolishNotation.remove(i);
                     reversPolishNotation.remove(i - 1);
@@ -56,7 +58,8 @@ public class Calculator {
                         reversPolishNotation.set(i - 1, operatorRegistry.calculationOperatorLogic(
                                 "-1",
                                 reversPolishNotation.get(i - 1),
-                                operatorRegistry.getOperators()[4]
+                                operatorRegistry.getOperators()[4],
+                                precision
                         ));
                         reversPolishNotation.remove(i);
                     }

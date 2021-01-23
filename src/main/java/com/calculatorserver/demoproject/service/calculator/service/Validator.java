@@ -1,8 +1,9 @@
 package com.calculatorserver.demoproject.service.calculator.service;
 
-
 import com.calculatorserver.demoproject.service.calculator.entity.Operator;
+import org.springframework.stereotype.Component;
 
+@Component
 public class Validator {
 
     private OperatorRegistry operatorRegistry;
@@ -26,19 +27,19 @@ public class Validator {
         char nextSymbol = ' ';
 
         Operator lastSymbol = operatorRegistry.searchOperator(String.valueOf(inputString.charAt(inputString.length() - 1)));
+
         if (lastSymbol != null) {
-            if (!lastSymbol.getOperator().equals(")")) {
+            if (!lastSymbol.getMathOperator().equals(")")) {
                 throw new IllegalArgumentException("В конце выражения не может быть оператор");
             }
         }
+
         Operator firstSymbol = operatorRegistry.searchOperator(String.valueOf(inputString.charAt(0)));
         if (firstSymbol != null) {
-            if (!firstSymbol.getOperator().equals("(")) {
+            if (!firstSymbol.getMathOperator().equals("(")) {
                 throw new IllegalArgumentException("Выражение не может начинаться с оператора");
             }
-
         }
-
 
         for (int i = 0; i < inputString.length(); i++) {
 
@@ -68,12 +69,9 @@ public class Validator {
                 continue;
             }
 
-
-
             if (previousSymbol == '(' && currentSymbol == '-') {
                 continue;
             }
-
 
             if (Character.isDigit(currentSymbol) && (!Character.isDigit(nextSymbol) || nextSymbol == ' ')) {
                 if (nextSymbol != '.') countNumber++;
@@ -95,12 +93,14 @@ public class Validator {
 
             Operator currentOperator = operatorRegistry.searchOperator(String.valueOf(currentSymbol));
 
-            if (currentOperator != null && !currentOperator.getOperator().equals("(") && !currentOperator.getOperator().equals(")")) {
+            if (currentOperator != null && !currentOperator.getMathOperator().equals("(") && !currentOperator.getMathOperator().equals(")")) {
+                previousSymbol = currentOperator.getMathOperator().charAt(0);
                 countOperator++;
             } else if (currentOperator == null) {
-                throw new IllegalArgumentException("Неизветный оператор " + inputString.charAt(i));
+                throw new IllegalArgumentException("Неизвестный оператор " + inputString.charAt(i));
             }
         }
+
         if (countNumber - 1 != countOperator) {
             throw new IllegalArgumentException("Операторы или числа не могут быть написаны два раза подряд");
         }
@@ -109,5 +109,4 @@ public class Validator {
             throw new IllegalArgumentException("Количество открытых и закрытых скобок не совпадает");
         }
     }
-
 }

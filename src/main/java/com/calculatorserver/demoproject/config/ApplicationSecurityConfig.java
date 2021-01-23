@@ -1,6 +1,6 @@
 package com.calculatorserver.demoproject.config;
 
-import com.calculatorserver.demoproject.service.UserDetailsServiceMapper;
+import com.calculatorserver.demoproject.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -18,11 +18,11 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 public class ApplicationSecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Autowired
-    UserDetailsServiceMapper userDetailsService;
+    UserService userService;
 
     @Bean
-    public UserDetailsServiceMapper userDetailsServiceMapper() {
-        return new UserDetailsServiceMapper();
+    public UserService userDetailsServiceMapper() {
+        return new UserService();
     }
 
     @Override
@@ -46,7 +46,7 @@ public class ApplicationSecurityConfig extends WebSecurityConfigurerAdapter {
     @Bean
     public DaoAuthenticationProvider authProvider() {
         DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
-        authProvider.setUserDetailsService(userDetailsService);
+        authProvider.setUserDetailsService(userService);
         authProvider.setPasswordEncoder(passwordEncoder());
         return authProvider;
     }

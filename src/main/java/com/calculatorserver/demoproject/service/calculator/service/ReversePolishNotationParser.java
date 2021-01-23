@@ -1,27 +1,27 @@
 package com.calculatorserver.demoproject.service.calculator.service;
 
 import com.calculatorserver.demoproject.service.calculator.entity.Operator;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
 
-import java.util.ArrayDeque;
-import java.util.Deque;
-import java.util.LinkedList;
+import java.util.*;
 
+@Component
+public class ReversePolishNotationParser {
 
-public class ReversePolishNotation {
-
-    private Deque<String> stackOperators = new ArrayDeque<String>();
+    private final Deque<String> stackOperators = new ArrayDeque<>();
 
     private LinkedList<String> output = new LinkedList<>();
-    private Validator validator;
-    private OperatorRegistry operatorRegistry;
+    private final Validator validator;
+    private final OperatorRegistry operatorRegistry;
 
-    public ReversePolishNotation(Validator validator, OperatorRegistry operatorRegistry) {
+    public ReversePolishNotationParser(Validator validator, OperatorRegistry operatorRegistry) {
         this.validator = validator;
         this.operatorRegistry = operatorRegistry;
     }
 
 
-    public LinkedList<String> parse(String inputString) {
+    public List<String> parse(String inputString) {
         output = new LinkedList<>();
         validator.validate(inputString.replaceAll("[ ]+", " "));
         StringBuilder stringBuffer = new StringBuilder();
@@ -35,7 +35,7 @@ public class ReversePolishNotation {
                 case ')':
                     addLast(stringBuffer.toString());
                     stringBuffer = new StringBuilder();
-                    moveOperatorsFromStackToInputString(i);
+                    moveOperatorsFromStackToInputString();
                     output.add(")");
                     break;
                 default:
@@ -46,7 +46,6 @@ public class ReversePolishNotation {
                         stringBuffer = new StringBuilder();
                         pushOperator(operatorRegistry.searchOperator(String.valueOf(inputString.charAt(i))));
                     }
-
             }
         }
         addLast(stringBuffer.toString());
@@ -67,8 +66,7 @@ public class ReversePolishNotation {
         }
     }
 
-    private void moveOperatorsFromStackToInputString(int i) {
-
+    private void moveOperatorsFromStackToInputString() {
         while (!stackOperators.getFirst().equals("(")) {
             output.add(stackOperators.pop());
         }
@@ -79,7 +77,7 @@ public class ReversePolishNotation {
         while (!stackOperators.isEmpty() && operatorRegistry.searchOperator(stackOperators.getFirst()).getPriority() >= operator.getPriority()) {
             output.add(stackOperators.pop());
         }
-        stackOperators.push(operator.getOperator());
+        stackOperators.push(operator.getMathOperator());
     }
 
 }

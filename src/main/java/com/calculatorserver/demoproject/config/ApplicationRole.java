@@ -1,7 +1,8 @@
 package com.calculatorserver.demoproject.config;
 
-import java.util.Set;
 import com.google.common.collect.Sets;
+
+import java.util.Set;
 
 import static com.calculatorserver.demoproject.config.ApplicationPermission.*;
 

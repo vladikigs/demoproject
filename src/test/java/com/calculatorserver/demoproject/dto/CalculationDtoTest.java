@@ -2,6 +2,7 @@ package com.calculatorserver.demoproject.dto;
 
 import com.calculatorserver.demoproject.entity.Calculation;
 import com.calculatorserver.demoproject.entity.User;
+import com.calculatorserver.demoproject.service.CalculationDtoConverter;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
@@ -23,7 +24,8 @@ class CalculationDtoTest {
         Calculation calculation2 = new Calculation(2L, date, user, false, "2+3", 3);
         calculations.add(calculation1);
         calculations.add(calculation2);
-        List<CalculationDto> calculationDtos = calculationDto.convertListToDto(calculations);
+        CalculationDtoConverter calculationDtoConverter = new CalculationDtoConverter();
+        List<CalculationDto> calculationDtos = calculationDtoConverter.convertListToDto(calculations);
 
         List<CalculationDto> calculationsDtos = new ArrayList<>();
         CalculationDto calculationDto1 = new CalculationDto(1L, date, user.getUsername(), false, "2+2", 3);

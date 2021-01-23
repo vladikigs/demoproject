@@ -2,67 +2,41 @@ package com.calculatorserver.demoproject.controller;
 
 import com.calculatorserver.demoproject.dto.CalculateRequest;
 import com.calculatorserver.demoproject.dto.CalculationDto;
-import com.calculatorserver.demoproject.entity.Cache;
-import com.calculatorserver.demoproject.entity.Calculation;
 import com.calculatorserver.demoproject.entity.User;
-import com.calculatorserver.demoproject.repository.UserRepository;
-import com.calculatorserver.demoproject.service.cache.CacheService;
-import com.calculatorserver.demoproject.service.SimpleUserExpressionsService;
-import com.calculatorserver.demoproject.service.calculator.service.Calculator;
+import com.calculatorserver.demoproject.service.CalculationsHistoryService;
+import com.calculatorserver.demoproject.service.CalculatorService;
+import com.calculatorserver.demoproject.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.List;
 
 @Controller
 public class CalculatorController {
 
     @Autowired
-    Calculator calculator;
-
+    CalculationsHistoryService calculationsHistoryService;
     @Autowired
-    CacheService cacheService;
-
+    UserService userService;
     @Autowired
-    SimpleUserExpressionsService simpleUserExpressionsService;
-
-    @Autowired
-    CalculationDto calculationDto;
-
+    CalculatorService calculatorService;
 
     @PostMapping("/calculator")
     @ResponseBody
-    public String serviceCalculator(@RequestBody CalculateRequest calculateRequest, Authentication authentication) {
-        User user = simpleUserExpressionsService.getUserByLogin(authentication.getName());
-        Cache elementInCache = cacheService.findElementInCache(calculateRequest.getExpression()+"#"+calculateRequest.getPrecision());
-
-        if (elementInCache != null) {
-            simpleUserExpressionsService.addCalculation(calculateRequest, false, user);
-            return elementInCache.getResultOfExpression();
-        } else {
-            String calculate = calculator.calculate(calculateRequest.getExpression(), calculateRequest.getPrecision());
-            simpleUserExpressionsService.addCalculation(calculateRequest, true, user);
-            Cache cache = new Cache(calculateRequest.getExpression(),
-                    calculateRequest.getPrecision());
-            cache.setResultOfExpression(calculate);
-            cacheService.addElementInCache(cache);
-
-            return calculate;
-        }
-
+    public String serviceCalculator(@Valid @RequestBody CalculateRequest calculateRequest,
+                                    Authentication authentication) {
+        User user = userService.loadUserByUsername(authentication.getName());
+        return calculatorService.calculateExpression(user, calculateRequest);
     }
 
-    @GetMapping("/getCalculations/{login}")
+    @GetMapping("/get-calculations-history/{login}")
     @ResponseBody
-    public List<CalculationDto> getUserCalculations(@PathVariable(name = "login") String login) {
-        User user = simpleUserExpressionsService.getUserByLogin(login);
-        List<Calculation> userExpressions = simpleUserExpressionsService.getUserExpressions(user);
-        return calculationDto.convertListToDto(userExpressions);
+    public List<CalculationDto> getHistory(@PathVariable(name = "login") String login) {
+        User user = userService.loadUserByUsername(login);
+        return calculationsHistoryService.getUserHistory(user);
     }
 
 
