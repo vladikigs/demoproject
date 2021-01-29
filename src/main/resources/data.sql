@@ -1,0 +1,1 @@
+INSERT INTO `User` (`id`, `login`, `password`, `is_account_non_expired`, `is_account_non_locked`, `is_credentials_non_expired`, `is_enabled`, `role`) VALUES (null, 'vlad', '$2a$10$t.x3VEn9eTbfT1ns0CF8WuYhw8rf83PSdO2Xs.w.Jew6oa1EuIzF.', 1, 1, 1, 1, 1)
